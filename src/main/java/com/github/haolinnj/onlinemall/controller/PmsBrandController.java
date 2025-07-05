@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,12 +26,14 @@ public class PmsBrandController {
 
     @Operation(summary = "list all brands")
     @RequestMapping(value = "/listAll", method = RequestMethod.GET)
+    @PreAuthorize("hasAuthority('brand:listAll')")
     public CommonResult<List<PmsBrand>> getBrandList(){
         return CommonResult.success(pmsBrandService.listAllBrand());
     }
 
     @Operation(summary = "create new brand")
     @RequestMapping(value = "/create", method = RequestMethod.POST)
+    @PreAuthorize("hasAuthority('brand:create')")
     public CommonResult createBrand(@RequestBody PmsBrand pmsBrand){
         LOGGER.info("即将插入品牌：{}", pmsBrand);
         CommonResult commonResult;
@@ -48,6 +51,7 @@ public class PmsBrandController {
 
     @Operation(summary = "update brand by id")
     @RequestMapping(value = "/update/{id}", method = RequestMethod.POST)
+    @PreAuthorize("hasAuthority('brand:update')")
     public CommonResult updateBrand(@PathVariable("id") Long id,
                                     @RequestBody PmsBrand pmsBrandDto,
                                     BindingResult result){
@@ -65,6 +69,7 @@ public class PmsBrandController {
 
     @Operation(summary = "delete brand by id")
     @RequestMapping(value = "/delete/{id}", method = RequestMethod.GET)
+    @PreAuthorize("hasAuthority('brand:delete')")
     public CommonResult updateBrand(@PathVariable("id") Long id){
         CommonResult commonResult;
         int count = pmsBrandService.deleteBrand(id);
@@ -79,6 +84,7 @@ public class PmsBrandController {
 
     @Operation(summary = "page query")
     @RequestMapping(value = "/list", method = RequestMethod.GET)
+    @PreAuthorize("hasAuthority('brand:list')")
     public CommonResult<CommonPage<PmsBrand>> listBrand(
             @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum,
             @RequestParam(value ="pageSize", defaultValue="3") Integer pageSize){
@@ -91,5 +97,4 @@ public class PmsBrandController {
     public CommonResult<PmsBrand> brand(@PathVariable("id") long id){
         return CommonResult.success(pmsBrandService.getBrand(id));
     }
-
 }

@@ -1,0 +1,121 @@
+package com.github.haolinnj.onlinemall.service.impl;
+
+import cn.hutool.core.collection.CollUtil;
+import com.github.haolinnj.onlinemall.common.utils.JwtTokenUtil;
+import com.github.haolinnj.onlinemall.domain.AdminUserDetails;
+import com.github.haolinnj.onlinemall.domain.UmsResource;
+import com.github.haolinnj.onlinemall.service.IUmsAdminService;
+import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Slf4j
+@Service
+public class UmsAdminServiceImpl implements IUmsAdminService {
+    /**
+     * 存放默认用户信息
+     */
+    private List<AdminUserDetails> adminUserDetailsList = new ArrayList<>();
+    /**
+     * 存放默认资源信息
+     */
+    private List<UmsResource> resourceList = new ArrayList<>();
+
+    @Autowired
+    private JwtTokenUtil jwtTokenUtil;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @PostConstruct
+    private void init(){
+        // 添加两个用户：admin 和 haolin
+        adminUserDetailsList.add(AdminUserDetails.builder()
+                .username("admin")
+                .password(passwordEncoder.encode("123456"))
+                .authorityList(CollUtil.toList("brand:create","brand:update","brand:delete","brand:list","brand:listAll"))
+                .build());
+        adminUserDetailsList.add(AdminUserDetails.builder()
+                .username("haolin")
+                .password(passwordEncoder.encode("123456"))
+                .authorityList(CollUtil.toList("brand:listAll"))
+                .build());
+        // 添加资源权限列表，对应后台接口权限控制
+        resourceList.add(UmsResource.builder()
+                .id(1L)
+                .name("brand:create")
+                .url("/brand/create")
+                .build());
+        resourceList.add(UmsResource.builder()
+                .id(2L)
+                .name("brand:update")
+                .url("/brand/update/**")
+                .build());
+        resourceList.add(UmsResource.builder()
+                .id(3L)
+                .name("brand:delete")
+                .url("/brand/delete/**")
+                .build());
+        resourceList.add(UmsResource.builder()
+                .id(4L)
+                .name("brand:list")
+                .url("/brand/list")
+                .build());
+        resourceList.add(UmsResource.builder()
+                .id(5L)
+                .name("brand:listAll")
+                .url("/brand/listAll")
+                .build());
+    }
+
+    @Override
+    public AdminUserDetails getAdminByUsername(String username){
+        List<AdminUserDetails> findList = adminUserDetailsList.stream()
+                .filter(item -> item.getUsername().equals(username))
+                .collect(Collectors.toList());
+        if (CollUtil.isNotEmpty(findList)){
+            return findList.get(0);
+        }
+        return null;
+    }
+
+    @Override
+    public List<UmsResource> getResourceList(){
+        return resourceList;
+    }
+
+    @Override
+    public String login(String username, String password){
+        String token = null;
+        try{
+            UserDetails userDetails = getAdminByUsername(username);
+            if(userDetails==null){
+                return token;
+            }
+            if(!passwordEncoder.matches(password, userDetails.getPassword())) {
+                throw new BadCredentialsException("Password incorrect");
+            }
+
+            // 设置spring security 上下文的认证对象
+            UsernamePasswordAuthenticationToken authenticationToken =
+                    new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+            SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+
+            // 生成JWT token
+            token = jwtTokenUtil.generateToken(userDetails);
+        } catch (AuthenticationException e) {
+            log.warn("login failed:{}", e.getMessage());
+        }
+        return token;
+    }
+}
