@@ -26,6 +26,11 @@ spring:
   elasticsearch:
     uris: http://localhost:9200 # ES的连接地址及端口号
 
+    mongodb:
+      host: localhost # MongoDB的连接地址
+      port: 27017 # MongoDB的连接端口号
+      database: mall-port # MongoDB的连接的数据库
+
 mybatis:
   mapper-locations:
     - classpath:dao/*.xml
@@ -60,3 +65,4 @@ secure:
       - /druid/**
       - /admin/**
       - /esProduct/**
+      - /member/readHistory/**
