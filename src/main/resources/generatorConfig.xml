@@ -43,7 +43,8 @@
         <javaClientGenerator type="XMLMAPPER" targetPackage="com.github.haolinnj.onlinemall.mbg.mapper"
                              targetProject="src\main\java"/>
         <!--生成全部表tableName设为%-->
-        <table tableName="pms_brand">
+        <table tableName="%">
+            <!-- 用来指定主键生成策略 -->
             <generatedKey column="id" sqlStatement="MySql" identity="true"/>
         </table>
     </context>

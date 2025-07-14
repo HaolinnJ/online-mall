@@ -2,6 +2,8 @@ package com.github.haolinnj.onlinemall.service;
 
 import com.github.haolinnj.onlinemall.domain.AdminUserDetails;
 import com.github.haolinnj.onlinemall.domain.UmsResource;
+import com.github.haolinnj.onlinemall.dto.UmsAdminParam;
+import com.github.haolinnj.onlinemall.mbg.model.UmsAdmin;
 
 import java.util.List;
 
@@ -13,6 +15,11 @@ public interface IUmsAdminService {
     AdminUserDetails getAdminByUsername(String username);
 
     /**
+     * registration
+     */
+    UmsAdmin register(UmsAdminParam umsAdminParam);
+
+    /**
      * 获取所有权限列表
      */
     List<UmsResource> getResourceList();
@@ -21,4 +28,6 @@ public interface IUmsAdminService {
      * 用户名密码登录
      */
     String login(String username, String Password);
+
+
 }

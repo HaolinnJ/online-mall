@@ -4,9 +4,14 @@ import cn.hutool.core.collection.CollUtil;
 import com.github.haolinnj.onlinemall.common.utils.JwtTokenUtil;
 import com.github.haolinnj.onlinemall.domain.AdminUserDetails;
 import com.github.haolinnj.onlinemall.domain.UmsResource;
+import com.github.haolinnj.onlinemall.dto.UmsAdminParam;
+import com.github.haolinnj.onlinemall.mbg.mapper.UmsAdminMapper;
+import com.github.haolinnj.onlinemall.mbg.model.UmsAdmin;
+import com.github.haolinnj.onlinemall.mbg.model.UmsAdminExample;
 import com.github.haolinnj.onlinemall.service.IUmsAdminService;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -17,6 +22,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,6 +42,8 @@ public class UmsAdminServiceImpl implements IUmsAdminService {
     private JwtTokenUtil jwtTokenUtil;
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private UmsAdminMapper adminMapper;
 
     @PostConstruct
     private void init(){
@@ -87,6 +95,26 @@ public class UmsAdminServiceImpl implements IUmsAdminService {
             return findList.get(0);
         }
         return null;
+    }
+
+    @Override
+    public UmsAdmin register(UmsAdminParam umsAdminParam){
+        UmsAdmin umsAdmin = new UmsAdmin();
+        BeanUtils.copyProperties(umsAdminParam, umsAdmin);
+        umsAdmin.setCreateTime(new Date());
+        umsAdmin.setStatus(1);
+        // find if there is user with same username
+        UmsAdminExample example = new UmsAdminExample();
+        example.createCriteria().andUsernameEqualTo(umsAdmin.getUsername());
+        List<UmsAdmin> umsAdminList = adminMapper.selectByExample(example);
+        if (umsAdminList.size()>0){
+            return null;
+        }
+        // encode password
+        String encodePassword = passwordEncoder.encode(umsAdmin.getPassword());
+        umsAdmin.setPassword(encodePassword);
+        adminMapper.insert(umsAdmin);
+        return umsAdmin;
     }
 
     @Override
