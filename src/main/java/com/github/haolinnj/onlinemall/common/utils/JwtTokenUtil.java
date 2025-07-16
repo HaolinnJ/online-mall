@@ -1,5 +1,7 @@
 package com.github.haolinnj.onlinemall.common.utils;
 
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.StrUtil;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -26,6 +28,8 @@ public class JwtTokenUtil {
     //expiration:token有效时间
     @Value("${jwt.expiration}")
     private Long expiration;
+    @Value("${jwt.tokenHead}")
+    private String tokenHead;
 
     /**
      * 生成token
@@ -112,11 +116,45 @@ public class JwtTokenUtil {
     public boolean canRefresh(String token){return !isTokenExpired(token);}
 
     /**
-     * 刷新token
+     * refresh token
      */
-    public String refreshToken(String token){
+    public String refreshHeadToken(String oldToken){
+        if (StrUtil.isEmpty(oldToken)){
+            return null;
+        }
+        String token = oldToken.substring(tokenHead.length());
+        if(StrUtil.isEmpty(token)){
+            return null;
+        }
+        // token校验不通过
         Claims claims = getClaimsFromToken(token);
-        claims.put(CLAIM_KEY_CREATED, new Date());
-        return generateToken(claims);
+        if(claims==null){
+            return null;
+        }
+        // 如果token已经过期，不支持刷新
+        if (isTokenExpired(token)){
+            return null;
+        }
+        // 如果token在30分钟内刷新过，返回原token
+        if (tokenRefreshJustBefore(token, 30*60)){
+            return token;
+        } else{
+            claims.put(CLAIM_KEY_CREATED, new Date());
+            return generateToken(claims);
+        }
+    }
+
+    /**
+     * check if token already refreshed just before certain time
+     */
+    private boolean tokenRefreshJustBefore(String token, int time){
+        Claims claims = getClaimsFromToken(token);
+        Date created = claims.get(CLAIM_KEY_CREATED, Date.class);
+        Date refreshDate = new Date();
+        // refresh时间在创建时间之后，且在指定时间区间内
+        if (refreshDate.after(created) && refreshDate.before(DateUtil.offsetSecond(created,time))){
+            return true;
+        }
+        return false;
     }
 }

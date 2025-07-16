@@ -1,5 +1,7 @@
 package com.github.haolinnj.onlinemall.domain;
 
+import com.github.haolinnj.onlinemall.mbg.model.UmsAdmin;
+import com.github.haolinnj.onlinemall.mbg.model.UmsResource;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -17,22 +19,32 @@ import java.util.stream.Collectors;
 @EqualsAndHashCode(callSuper = false)
 @Builder
 public class AdminUserDetails implements UserDetails {
-    private String username;
-    private String password;
-    private List<String> authorityList;
+    //后台用户
+    private final UmsAdmin umsAdmin;
+    //拥有资源列表
+    private final List<UmsResource> resourceList;
+
+    public AdminUserDetails(UmsAdmin umsAdmin,List<UmsResource> resourceList) {
+        this.umsAdmin = umsAdmin;
+        this.resourceList = resourceList;
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return this.authorityList.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
+        //返回当前用户所拥有的资源
+        return resourceList.stream()
+                .map(resource ->new SimpleGrantedAuthority(resource.getId()+":"+resource.getName()))
+                .collect(Collectors.toList());
     }
 
     @Override
     public String getPassword() {
-        return this.password;
+        return umsAdmin.getPassword();
     }
 
     @Override
     public String getUsername() {
-        return this.username;
+        return umsAdmin.getUsername();
     }
 
     @Override
@@ -52,6 +64,6 @@ public class AdminUserDetails implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return umsAdmin.getStatus().equals(1);
     }
 }
