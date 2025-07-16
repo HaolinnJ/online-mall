@@ -79,10 +79,10 @@ public interface IUmsAdminService {
      */
     UserDetails loadUserByUsername (String username);
 
-    /**
-     * get cache service
-     */
-    IUmsAdminCacheService getCacheService();
+//    /**
+//     * get cache service
+//     */
+//    IUmsAdminCacheService getCacheService();
 
     /**
      * logout function

@@ -5,7 +5,6 @@ import com.github.haolinnj.onlinemall.common.api.CommonResult;
 import com.github.haolinnj.onlinemall.dto.UmsAdminLoginParam;
 import com.github.haolinnj.onlinemall.dto.UmsAdminParam;
 import com.github.haolinnj.onlinemall.mbg.model.UmsAdmin;
-import com.github.haolinnj.onlinemall.mbg.model.UmsResource;
 import com.github.haolinnj.onlinemall.mbg.model.UmsRole;
 import com.github.haolinnj.onlinemall.service.IUmsAdminService;
 import com.github.haolinnj.onlinemall.service.IUmsRoleService;
@@ -92,6 +91,13 @@ public class UmsAdminController {
             data.put("roles",roles);
         }
         return CommonResult.success(data);
+    }
+
+    @Operation(description = "logout function")
+    @RequestMapping(value = "/logout", method = RequestMethod.POST)
+    public CommonResult logout(Principal principal){
+        adminService.logout(principal.getName());
+        return CommonResult.success(null);
     }
 
 

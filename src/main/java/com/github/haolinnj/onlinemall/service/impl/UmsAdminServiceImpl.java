@@ -2,9 +2,9 @@ package com.github.haolinnj.onlinemall.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.extra.spring.SpringUtil;
 import com.github.haolinnj.onlinemall.common.utils.JwtTokenUtil;
 import com.github.haolinnj.onlinemall.common.utils.RequestUtil;
+import com.github.haolinnj.onlinemall.common.utils.SpringUtil;
 import com.github.haolinnj.onlinemall.dao.UmsAdminRoleRelationDao;
 import com.github.haolinnj.onlinemall.domain.AdminUserDetails;
 import com.github.haolinnj.onlinemall.dto.UmsAdminParam;
@@ -20,6 +20,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
@@ -61,10 +62,14 @@ public class UmsAdminServiceImpl implements IUmsAdminService {
     @Autowired
     private UmsAdminLoginLogMapper loginLogMapper;
 
+    @Lazy
+    @Autowired
+    private IUmsAdminCacheService umsAdminCacheService;
+
     @Override
     public UmsAdmin getAdminByUsername(String username){
         // 从缓存中获取数据
-        UmsAdmin admin = getCacheService().getAdmin(username);
+        UmsAdmin admin = umsAdminCacheService.getAdmin(username);
         if(admin != null) return admin;
         // 如果缓存中没有则从数据库中获取
         UmsAdminExample example = new UmsAdminExample();
@@ -73,7 +78,7 @@ public class UmsAdminServiceImpl implements IUmsAdminService {
         if(adminList != null && adminList.size() > 0){
             admin = adminList.get(0);
             // 将数据库中的数据存入缓存中
-            getCacheService().setAdmin(admin);
+            umsAdminCacheService.setAdmin(admin);
             return admin;
         }
         return null;
@@ -177,15 +182,15 @@ public class UmsAdminServiceImpl implements IUmsAdminService {
             }
         }
         int count = adminMapper.updateByPrimaryKeySelective(admin);
-        getCacheService().delAdmin(id);
+        umsAdminCacheService.delAdmin(id);
         return count;
     }
 
     @Override
     public int delete(Long id) {
         int count = adminMapper.deleteByPrimaryKey(id);
-        getCacheService().delAdmin(id);
-        getCacheService().delResourceList(id);
+        umsAdminCacheService.delAdmin(id);
+        umsAdminCacheService.delResourceList(id);
         return count;
     }
 
@@ -207,7 +212,7 @@ public class UmsAdminServiceImpl implements IUmsAdminService {
             }
             adminRoleRelationDao.insertList(list);
         }
-        getCacheService().delResourceList(adminId);
+        umsAdminCacheService.delResourceList(adminId);
         return count;
     }
 
@@ -219,7 +224,7 @@ public class UmsAdminServiceImpl implements IUmsAdminService {
     @Override
     public List<UmsResource> getResourceList(Long adminId) {
         // first get info from cache
-        List<UmsResource> resourceList = getCacheService().getResourceList(adminId);
+        List<UmsResource> resourceList = umsAdminCacheService.getResourceList(adminId);
         if(CollUtil.isNotEmpty(resourceList)){
             return  resourceList;
         }
@@ -227,7 +232,7 @@ public class UmsAdminServiceImpl implements IUmsAdminService {
         resourceList = adminRoleRelationDao.getResourceList(adminId);
         if(CollUtil.isNotEmpty(resourceList)){
             // save data in cache
-            getCacheService().setResourceList(adminId,resourceList);
+            umsAdminCacheService.setResourceList(adminId,resourceList);
         }
         return resourceList;
     }
@@ -248,14 +253,17 @@ public class UmsAdminServiceImpl implements IUmsAdminService {
         throw new UsernameNotFoundException("Username or password wrong");
     }
 
-    @Override
-    public IUmsAdminCacheService getCacheService() {
-        return SpringUtil.getBean(IUmsAdminCacheService.class);
-    }
+//    @Override
+//    public IUmsAdminCacheService getCacheService() {
+//        return SpringUtil.getBean(IUmsAdminCacheService.class);
+//    }
 
     @Override
     public void logout(String username) {
-
+        // remove all data related to user in cache
+        UmsAdmin admin = umsAdminCacheService.getAdmin(username);
+        umsAdminCacheService.delAdmin(admin.getId());
+        umsAdminCacheService.delResourceList(admin.getId());
     }
 
 
