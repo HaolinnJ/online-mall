@@ -1,9 +1,11 @@
 package com.github.haolinnj.onlinemall.controller;
 
 import cn.hutool.core.collection.CollUtil;
+import com.github.haolinnj.onlinemall.common.api.CommonPage;
 import com.github.haolinnj.onlinemall.common.api.CommonResult;
 import com.github.haolinnj.onlinemall.dto.UmsAdminLoginParam;
 import com.github.haolinnj.onlinemall.dto.UmsAdminParam;
+import com.github.haolinnj.onlinemall.dto.UpdateAdminPasswordParam;
 import com.github.haolinnj.onlinemall.mbg.model.UmsAdmin;
 import com.github.haolinnj.onlinemall.mbg.model.UmsRole;
 import com.github.haolinnj.onlinemall.service.IUmsAdminService;
@@ -100,5 +102,46 @@ public class UmsAdminController {
         return CommonResult.success(null);
     }
 
+    @Operation(description = "get user list by username")
+    @RequestMapping(value = "list", method = RequestMethod.GET)
+    public CommonResult <CommonPage<UmsAdmin>> list(@RequestParam(value = "keyword", required = false) String keyword,
+                                                    @RequestParam(value = "pageSize", defaultValue = "5") Integer pageSize,
+                                                    @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum){
+        List<UmsAdmin> adminList = adminService.list(keyword, pageSize, pageNum);
+        return CommonResult.success(CommonPage.restPage(adminList));
+    }
 
+    @Operation(description = "get user info")
+    @RequestMapping(value = "/{id}", method = RequestMethod.GET)
+    public CommonResult<UmsAdmin> getItem (@PathVariable Long id){
+        UmsAdmin admin = adminService.getItem(id);
+        return CommonResult.success(admin);
+    }
+
+    @Operation(description = "change user info")
+    @RequestMapping(value = "/update/{id}", method = RequestMethod.POST)
+    public CommonResult update(@PathVariable Long id, @RequestBody UmsAdmin admin){
+        int count = adminService.update(id, admin);
+        if (count > 0){
+            return CommonResult.success(count);
+        }
+        return CommonResult.failed();
+    }
+
+    @Operation(description = "change user password")
+    @RequestMapping(value = "/updatePassword", method = RequestMethod.POST)
+    public CommonResult updatePassword(@Validated @RequestBody UpdateAdminPasswordParam updatePasswordParam){
+        int status = adminService.updatePassword(updatePasswordParam);
+        if (status > 0){
+            return CommonResult.success(status);
+        } else if (status == -1){
+            return CommonResult.failed("Invalid parameter");
+        } else if (status == -2) {
+        return CommonResult.failed("Could not find user");
+        } else if (status == -3) {
+            return CommonResult.failed("Wrong old password");
+        } else {
+            return CommonResult.failed();
+        }
+    }
 }
