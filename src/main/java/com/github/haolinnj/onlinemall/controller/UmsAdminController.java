@@ -144,4 +144,14 @@ public class UmsAdminController {
             return CommonResult.failed();
         }
     }
+
+    @Operation(description = "delete user info")
+    @RequestMapping(value = "/delete/{id}", method = RequestMethod.POST)
+    public  CommonResult delete(@PathVariable Long id){
+        int count = adminService.delete(id);
+        if(count > 0){
+            return CommonResult.success(count);
+        }
+        return CommonResult.failed();
+    }
 }
