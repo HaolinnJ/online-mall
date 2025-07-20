@@ -13,6 +13,7 @@ import com.github.haolinnj.onlinemall.service.IUmsRoleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
+import org.simpleframework.xml.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.validation.annotation.Validated;
@@ -153,5 +154,35 @@ public class UmsAdminController {
             return CommonResult.success(count);
         }
         return CommonResult.failed();
+    }
+
+    @Operation(description = "update account status")
+    @RequestMapping(value = "/updateStatus/{id}", method = RequestMethod.POST)
+    public CommonResult updateStatus (@PathVariable Long id, @RequestParam(value = "status") Integer status){
+        UmsAdmin umsAdmin = new UmsAdmin();
+        umsAdmin.setStatus(status);
+        int count = adminService.update(id, umsAdmin);
+        if(count > 0){
+            return CommonResult.success(count);
+        }
+        return CommonResult.failed();
+    }
+
+    @Operation(description = "assign role to user")
+    @RequestMapping(value = "/role/update", method = RequestMethod.POST)
+    public CommonResult updateRole(@RequestParam("adminId") Long adminId,
+                                   @RequestParam("roleIds") List<Long> roleIds){
+        int count = adminService.updateRole(adminId, roleIds);
+        if(count >= 0){
+            return CommonResult.success(count);
+        }
+        return CommonResult.failed();
+    }
+
+    @Operation(description = "get roles of user")
+    @RequestMapping(value = "/role/{adminId}", method = RequestMethod.GET)
+    public CommonResult<List<UmsRole>> getRoleList (@PathVariable Long adminId){
+        List<UmsRole> roleList = adminService.getRoleList(adminId);
+        return CommonResult.success(roleList);
     }
 }
