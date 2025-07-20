@@ -13,7 +13,6 @@ import com.github.haolinnj.onlinemall.service.IUmsRoleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
-import org.simpleframework.xml.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.validation.annotation.Validated;
@@ -25,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-//后台用户管理
+//User Controller
 @RestController
 @Tag(name = "UmsAdminController", description = "User Management")
 @RequestMapping("/admin")
