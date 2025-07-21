@@ -2,10 +2,13 @@ package com.github.haolinnj.onlinemall.controller;
 
 import com.github.haolinnj.onlinemall.common.api.CommonPage;
 import com.github.haolinnj.onlinemall.common.api.CommonResult;
+import com.github.haolinnj.onlinemall.mbg.model.UmsMenu;
+import com.github.haolinnj.onlinemall.mbg.model.UmsResource;
 import com.github.haolinnj.onlinemall.mbg.model.UmsRole;
 import com.github.haolinnj.onlinemall.service.IUmsRoleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.checkerframework.common.util.count.report.qual.ReportUnqualified;
 import org.simpleframework.xml.Path;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -76,5 +79,33 @@ public class UmsRoleController {
             return CommonResult.success(count);
         }
         return CommonResult.failed();
+    }
+
+    @Operation(description = "list role related menu")
+    @RequestMapping(value = "/listMenu/{roleId}", method = RequestMethod.GET)
+    public CommonResult<List<UmsMenu>> listMenu(@PathVariable Long roleId){
+        List<UmsMenu> roleList = roleService.listMenu(roleId);
+        return CommonResult.success(roleList);
+    }
+
+    @Operation(description = "list role related resources")
+    @RequestMapping(value = "/listResource/{roleId}", method = RequestMethod.GET)
+    public CommonResult<List<UmsResource>> listResource (@PathVariable Long roleId){
+        List<UmsResource> roleList = roleService.listResource(roleId);
+        return CommonResult.success(roleList);
+    }
+
+    @Operation(description = "assign menu to role")
+    @RequestMapping(value = "/allocMenu", method = RequestMethod.POST)
+    public CommonResult allocMenu(@RequestParam Long roleId, @RequestParam List<Long> menuIds){
+        int count = roleService.allocMenu(roleId, menuIds);
+        return CommonResult.success(count);
+    }
+
+    @Operation(description = "assign resource to role")
+    @RequestMapping(value = "/allocResource", method = RequestMethod.POST)
+    public CommonResult allocResource(@RequestParam Long roleId, @RequestParam List<Long> resourceIds){
+        int count = roleService.allocResource(roleId,resourceIds);
+        return CommonResult.success(count);
     }
 }

@@ -1,11 +1,11 @@
 package com.github.haolinnj.onlinemall.service.impl;
 
 import cn.hutool.core.util.StrUtil;
+import com.github.haolinnj.onlinemall.dao.UmsRoleDao;
 import com.github.haolinnj.onlinemall.mbg.mapper.UmsRoleMapper;
-import com.github.haolinnj.onlinemall.mbg.model.UmsMenu;
-import com.github.haolinnj.onlinemall.mbg.model.UmsResource;
-import com.github.haolinnj.onlinemall.mbg.model.UmsRole;
-import com.github.haolinnj.onlinemall.mbg.model.UmsRoleExample;
+import com.github.haolinnj.onlinemall.mbg.mapper.UmsRoleMenuRelationMapper;
+import com.github.haolinnj.onlinemall.mbg.mapper.UmsRoleResourceRelationMapper;
+import com.github.haolinnj.onlinemall.mbg.model.*;
 import com.github.haolinnj.onlinemall.service.IUmsAdminCacheService;
 import com.github.haolinnj.onlinemall.service.IUmsRoleService;
 import com.github.pagehelper.PageHelper;
@@ -19,7 +19,12 @@ import java.util.List;
 public class UmsRoleServiceImpl implements IUmsRoleService {
     @Autowired
     private UmsRoleMapper roleMapper;
-
+    @Autowired
+    private UmsRoleResourceRelationMapper roleResourceRelationMapper;
+    @Autowired
+    private UmsRoleMenuRelationMapper roleMenuRelationMapper;
+    @Autowired
+    private UmsRoleDao roleDao;
     @Autowired
     private IUmsAdminCacheService adminCacheService;
 
@@ -63,26 +68,48 @@ public class UmsRoleServiceImpl implements IUmsRoleService {
 
     @Override
     public List<UmsMenu> getMenuList(Long adminId) {
-        return List.of();
+        return roleDao.getMenuList(adminId);
     }
 
     @Override
     public List<UmsMenu> listMenu(Long roleId) {
-        return List.of();
+        return roleDao.getMenuListByRoleId(roleId);
     }
 
     @Override
     public List<UmsResource> listResource(Long roleId) {
-        return List.of();
+        return roleDao.getResourceListByRoleId(roleId);
     }
 
     @Override
     public int allocMenu(Long roleId, List<Long> menuIds) {
-        return 0;
+        //delete previous relation
+        UmsRoleMenuRelationExample example = new UmsRoleMenuRelationExample();
+        example.createCriteria().andRoleIdEqualTo(roleId);
+        roleMenuRelationMapper.deleteByExample(example);
+        //add new relation
+        for (Long menuId: menuIds){
+            UmsRoleMenuRelation relation = new UmsRoleMenuRelation();
+            relation.setRoleId(roleId);
+            relation.setMenuId(menuId);
+            roleMenuRelationMapper.insert(relation);
+        }
+        return menuIds.size();
     }
 
     @Override
     public int allocResource(Long roleId, List<Long> resourceIds) {
-        return 0;
+        //delete previous relation
+        UmsRoleResourceRelationExample example = new UmsRoleResourceRelationExample();
+        example.createCriteria().andRoleIdEqualTo(roleId);
+        roleResourceRelationMapper.deleteByExample(example);
+        //add new relation
+        for (Long resourceId : resourceIds){
+            UmsRoleResourceRelation relation = new UmsRoleResourceRelation();
+            relation.setRoleId(roleId);
+            relation.setResourceId(resourceId);
+            roleResourceRelationMapper.insert(relation);
+        }
+        return resourceIds.size();
     }
 }
