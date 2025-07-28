@@ -92,3 +92,10 @@ public class SecurityConfig {
 //                .cacheControl(cache -> cache.disable())); //禁止浏览器缓存响应，避免安全数据被前端缓存
 //        return http.build();
 //    }
+
+//        //去除所有安全配置
+//        httpSecurity.csrf(csrf -> csrf.disable())
+//                .authorizeHttpRequests(authorize->authorize.anyRequest().permitAll());
+//        return httpSecurity.build();
+//    }}
+

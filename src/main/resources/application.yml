@@ -93,3 +93,4 @@ secure:
       - /order/**
       - /minio/**
       - /role/**
+      - /menu/**
