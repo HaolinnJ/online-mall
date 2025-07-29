@@ -7,7 +7,6 @@ import com.github.haolinnj.onlinemall.dto.UmsMenuNode;
 import com.github.haolinnj.onlinemall.mbg.model.UmsMenu;
 import com.github.haolinnj.onlinemall.service.IUmsMenuService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -25,12 +24,6 @@ public class UmsMenuController {
     @Operation(summary = "add menu")
     @RequestMapping(value = "/create", method = RequestMethod.POST)
     public CommonResult create(@RequestBody UmsMenu umsMenu){
-        System.out.println("DEBUG: Injected ObjectMapper instance hash: " + configuredObjectMapper.hashCode());
-        System.out.println("DEBUG: Injected ObjectMapper instance type: " + configuredObjectMapper.getClass().getName());
-        System.out.println("DEBUG: UmsMenu class loaded from: " + umsMenu.getClass().getProtectionDomain().getCodeSource().getLocation());
-        System.out.println("FINAL CHECK: @RequestBody UmsMenu object: " + umsMenu);
-        System.out.println("FINAL CHECK: @RequestBody UmsMenu parentId: " + (umsMenu != null ? umsMenu.getParentId() : "umsMenu is null"));
-        System.out.println("FINAL CHECK: @RequestBody UmsMenu title: " + (umsMenu != null ? umsMenu.getTitle() : "umsMenu is null"));
         int count = menuService.create(umsMenu);
         if(count > 0){
             return CommonResult.success(count);

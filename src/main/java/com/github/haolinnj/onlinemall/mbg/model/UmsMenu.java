@@ -70,7 +70,6 @@ public class UmsMenu implements Serializable {
     }
 
     public void setParentId(Long parentId) {
-        System.out.println("UmsMenu.setParentId() called with value: " + parentId);
         this.parentId = parentId;
     }
 
