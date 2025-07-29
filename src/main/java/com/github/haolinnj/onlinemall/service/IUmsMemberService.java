@@ -1,6 +1,9 @@
 package com.github.haolinnj.onlinemall.service;
 
 import com.github.haolinnj.onlinemall.common.api.CommonResult;
+import com.github.haolinnj.onlinemall.mbg.model.UmsMemberLevel;
+
+import java.util.List;
 
 public interface IUmsMemberService {
     /**
@@ -13,4 +16,8 @@ public interface IUmsMemberService {
      */
     CommonResult verifyAuthCode(String telephone, String authCode);
 
+    /**
+     * list all member level
+     */
+    List<UmsMemberLevel> list(Integer defaultStatus);
 }

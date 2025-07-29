@@ -2,12 +2,16 @@ package com.github.haolinnj.onlinemall.service.impl;
 
 import cn.hutool.core.util.StrUtil;
 import com.github.haolinnj.onlinemall.common.api.CommonResult;
+import com.github.haolinnj.onlinemall.mbg.mapper.UmsMemberLevelMapper;
+import com.github.haolinnj.onlinemall.mbg.model.UmsMemberLevel;
+import com.github.haolinnj.onlinemall.mbg.model.UmsMemberLevelExample;
 import com.github.haolinnj.onlinemall.service.IRedisService;
 import com.github.haolinnj.onlinemall.service.IUmsMemberService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Random;
 
 @Service
@@ -18,6 +22,8 @@ public class UmsMemberServiceImpl implements IUmsMemberService {
 //    private String REDIS_KEY_PREFIX_AUTH_CODE;
 //    @Value("${redis.key.expire.authCode}")
 //    private Long AUTH_CODE_EXPIRE_SECONDS;
+    @Autowired
+    private UmsMemberLevelMapper memberLevelMapper;
 
     @Override
     public CommonResult generateAuthCode(String telephone) {
@@ -46,5 +52,12 @@ public class UmsMemberServiceImpl implements IUmsMemberService {
 //            return CommonResult.failed("Code not correct");
 //        }
         return CommonResult.success(null, null);
+    }
+
+    @Override
+    public List<UmsMemberLevel> list(Integer defaultStatus) {
+        UmsMemberLevelExample example = new UmsMemberLevelExample();
+        example.createCriteria().andDefaultStatusEqualTo(defaultStatus);
+        return memberLevelMapper.selectByExample(example);
     }
 }
